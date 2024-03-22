@@ -34,9 +34,30 @@ using ParkingGarage
 ```
 
 and also regular packages
-
 ```{julia}
 using Plots
 Plots.default(; margin=5Plots.mm)
 ```
 
+## Uncertainty
+
+We want to generate an ensemble of SOWs over which we can analyze the NPV for each policy. For these situations I am keeping the number of years and the discount rate constant. 
+I specified the number of years to be n_years=50 because according to online engineering sources cement parkinglots have a uooerbound lifespan of about 50 years.
+I set the discount rate to 0.07 or 7% because this is the base discount rate recommended by Circular A-4 in the United States.
+```{julia}
+N_SOW = 100
+sow = ParkingGarageSOW(sow.demand_growth_rate, n_years = 50, discount_rate = 0.07 for i in N_SOW)
+```
+
+Using the large ensemble of SOWs generated above, we can analyze the NPV for different level additions across many states of the world and find the average, which will can than be ploted to demonstrate the profits.
+```{julia}
+NPV_level = []
+for j in N_SOW  
+    n_levels = 2:12
+    policies = [StaticPolicy(i) for i in n_levels]
+    profits = [simulate(sow[j], policy) for policy in policies]
+    profit_avg = mean(profits)
+    push!(NPV_level, profit avg)
+end
+plot(n_levels, NPV_level)
+```
