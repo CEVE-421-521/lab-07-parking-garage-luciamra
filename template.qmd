@@ -79,3 +79,30 @@ plot(
     )
     hline!([0])
 ```
+
+## Adaptive Case
+
+Now we can attempt to implement the strategies deiscussed in Neufville's paper to examine the effects of flexibility in decision making. This adaptive policy analysis considers a sort of feedback loop rather than only making one elevation at year 1. Now for every year, the demand is compared to the capacity. If the demand exceeds capacity an addition level will be added, if not then there is no change. 
+```{julia}
+NPV_levelA = []
+
+n_levels = 2
+policiesA = AdaptivePolicy(n_levels)
+for j in 1:length(sow_ens)  
+    profitsA = simulate(getindex(sow_ens,j), policiesA)
+    profits_avgA = mean.(profitsA)
+    push!(NPV_levelA, profits_avgA)
+end
+
+plot(
+        n_levelsA,
+        NPV_levelA;
+        ylabel="NPV Profits [Million USD]",
+        xlabel="Number of levels",
+        legend=false,
+        title="50 Year Horizon, 7% Discount, Uncertain Demand Growth",
+        size=(800, 400),
+        xticks=n_levels,
+    )
+    hline!([0])
+```
