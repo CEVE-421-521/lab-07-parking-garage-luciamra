@@ -31,6 +31,7 @@ references: references.bib
 ```{julia}
 using Revise
 using ParkingGarage
+using Statistics
 ```
 
 and also regular packages
@@ -45,19 +46,36 @@ We want to generate an ensemble of SOWs over which we can analyze the NPV for ea
 I specified the number of years to be n_years=50 because according to online engineering sources cement parkinglots have a uooerbound lifespan of about 50 years.
 I set the discount rate to 0.07 or 7% because this is the base discount rate recommended by Circular A-4 in the United States.
 ```{julia}
-N_SOW = 100
-sow = ParkingGarageSOW(sow.demand_growth_rate, n_years = 50, discount_rate = 0.07 for i in N_SOW)
+sow_ens = []
+dgrs = [5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0,95.0] 
+for i in 1:length(dgrs)
+    sow = ParkingGarageSOW(; demand_growth_rate=getindex(dgrs,i), n_years=50, discount_rate=0.07)
+    push!(sow_ens, sow)
+end
+return sow_ens
 ```
 
 Using the large ensemble of SOWs generated above, we can analyze the NPV for different level additions across many states of the world and find the average, which will can than be ploted to demonstrate the profits.
 ```{julia}
 NPV_level = []
-for j in N_SOW  
-    n_levels = 2:12
-    policies = [StaticPolicy(i) for i in n_levels]
-    profits = [simulate(sow[j], policy) for policy in policies]
-    profit_avg = mean(profits)
-    push!(NPV_level, profit avg)
+
+n_levels = 2:12
+policies = [StaticPolicy(i) for i in n_levels]
+for j in 1:length(sow_ens)  
+    profits = [simulate(getindex(sow_ens,j), policy) for policy in policies]
+    profits_avg = mean.(profits)
+    push!(NPV_level, profits_avg)
 end
-plot(n_levels, NPV_level)
+
+plot(
+        n_levels,
+        NPV_level;
+        ylabel="NPV Profits [Million USD]",
+        xlabel="Number of levels",
+        legend=false,
+        title="50 Year Horizon, 7% Discount, Uncertain Demand Growth",
+        size=(800, 400),
+        xticks=n_levels,
+    )
+    hline!([0])
 ```
