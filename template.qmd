@@ -86,23 +86,23 @@ Now we can attempt to implement the strategies deiscussed in Neufville's paper t
 ```{julia}
 NPV_levelA = []
 
-n_levels = 2
-policiesA = AdaptivePolicy(n_levels)
+n_levels_init = 2
+policiesA = AdaptivePolicy(n_levels_init)
 for j in 1:length(sow_ens)  
     profitsA = simulate(getindex(sow_ens,j), policiesA)
     profits_avgA = mean.(profitsA)
     push!(NPV_levelA, profits_avgA)
 end
 
-plot(
-        n_levelsA,
-        NPV_levelA;
-        ylabel="NPV Profits [Million USD]",
-        xlabel="Number of levels",
-        legend=false,
-        title="50 Year Horizon, 7% Discount, Uncertain Demand Growth",
-        size=(800, 400),
-        xticks=n_levels,
-    )
-    hline!([0])
+#plot(
+        #n_levelsA,
+        #NPV_levelA;
+        #ylabel="NPV Profits [Million USD]",
+        #xlabel="Number of levels",
+        #legend=false,
+        #title="50 Year Horizon, 7% Discount, Uncertain Demand Growth",
+        #size=(800, 400),
+        #xticks=n_levels,
+    #)
+    #hline!([0])
 ```
