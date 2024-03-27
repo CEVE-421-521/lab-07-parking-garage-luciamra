@@ -38,7 +38,7 @@ function get_action(x::ParkingGarageState, policy::AdaptivePolicy)
         n_levels = ParkingGarageAction(policy.n_levels_init)
         return n_levels
     else
-        demand = ParkingGarage.calculate_demand(sow.n_years, sow.demand_growth_rate)
+        demand = ParkingGarage.calculate_demand(x.year, sow.demand_growth_rate)
         capacity = calculate_capacity(x.n_levels)
         if demand > capacity
             n_levels = n_levels + 1
