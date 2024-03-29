@@ -86,10 +86,15 @@ Now we can attempt to implement the strategies deiscussed in Neufville's paper t
 ```{julia}
 NPV_levelA = []
 
+# initial number of levels
 n_levels_init = 2
-policiesA = AdaptivePolicy(n_levels_init)
 for j in 1:length(sow_ens)  
-    profitsA = simulate(getindex(sow_ens,j), policiesA)
+    # for each SOW from out vector
+    sow = getindex(sow_ens,j)
+    # run the adaptive policy wit pur initial elevation
+    policiesA = AdaptivePolicy(n_levels_init)
+    # run the simulation for the sow with this adaptive policy
+    profitsA = simulate(sow, policiesA)
     profits_avgA = mean.(profitsA)
     push!(NPV_levelA, profits_avgA)
 end
