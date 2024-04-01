@@ -37,15 +37,13 @@ function get_action(x::ParkingGarageState, policy::AdaptivePolicy)
     if x.year == 1
         return ParkingGarageAction(policy.n_levels_init)
     else
-        dgrs = [5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0,95.0] 
-        for i in 1:length(dgrs)
-            return ParkingGarageState(0, 1, calculate_demand(1, getindex(dgrs,i)))
-        end
         demand = x.demand 
         capacity = calculate_capacity(x)
         if demand > capacity
+            #Δn_levels = ParkingGarageAction(1)
             return ParkingGarageAction(1)
         else
+            #Δn_levels = ParkingGarageAction(0)
             return ParkingGarageAction(0)
         end
     end
