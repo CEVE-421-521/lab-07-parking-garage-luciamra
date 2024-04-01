@@ -46,76 +46,39 @@ We want to generate an ensemble of SOWs over which we can analyze the NPV for ea
 I specified the number of years to be n_years=50 because according to online engineering sources cement parkinglots have a uooerbound lifespan of about 50 years.
 I set the discount rate to 0.07 or 7% because this is the base discount rate recommended by Circular A-4 in the United States.
 ```{julia}
-sow_ens = []
-dgrs = [5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0,95.0] 
-for i in 1:length(dgrs)
-    sow = ParkingGarageSOW(; demand_growth_rate=getindex(dgrs,i), n_years=50, discount_rate=0.07)
-    push!(sow_ens, sow)
-end
-return sow_ens
+dgrs = 5.0:5:95.0
+n_years = 50
+discount_rate = 0.07
+sow_ens = [
+    ParkingGarageSOW(;
+        demand_growth_rate=dgr, n_years=n_years, discount_rate=discount_rate
+    ) for dgr in dgrs
+]
 ```
 
 Using the large ensemble of SOWs generated above, we can analyze the NPV for different level additions across many states of the world and find the average, which will can than be ploted to demonstrate the profits.
 ```{julia}
-NPV_level = []
-
 n_levels = 2:12
-policies = [StaticPolicy(i) for i in n_levels]
-for j in 1:length(sow_ens)  
-    profits = [simulate(getindex(sow_ens,j), policy) for policy in policies]
-    profits_avg = mean.(profits)
-    push!(NPV_level, profits_avg)
-end
+static_policies = [StaticPolicy(i) for i in n_levels]
+
+NPV_static = [
+    mean([simulate(sow, policy) for sow in sow_ens]) for policy in static_policies
+]
 
 plot(
-        n_levels,
-        NPV_level;
-        ylabel="NPV Profits [Million USD]",
-        xlabel="Number of levels",
-        legend=false,
-        title="50 Year Horizon, 7% Discount, Uncertain Demand Growth",
-        size=(800, 400),
-        xticks=n_levels,
-    )
-    hline!([0])
-
-return NPV_level
+    n_levels,
+    NPV_static;
+    ylabel="NPV Profits [Million USD]",
+    xlabel="Number of levels [Static Policy]",
+    legend=false,
+    title="$(n_years) Year Horizon, $(round(discount_rate * 100))% Discount, Uncertain Demand Growth",
+    size=(800, 400),
+    xticks=n_levels,
+)
+hline!([0])
 
 ```
 
 ## Adaptive Case
 
 Now we can attempt to implement the strategies deiscussed in Neufville's paper to examine the effects of flexibility in decision making. This adaptive policy analysis considers a sort of feedback loop rather than only making one elevation at year 1. Now for every year, the demand is compared to the capacity. If the demand exceeds capacity an addition level will be added, if not then there is no change. 
-```{julia}
-NPV_levelA = []
-pol = []
-
-year = [1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0,33.0,34.0,35.0,36.0,37.0,38.0,39.0,40.0,41.0,42.0,43.0,44.0,45.0,46.0,47.0,48.0,49.0,50.0]
-# initial number of levels
-n_levels_init = 2
-for j in 1:length(sow_ens)  
-    # for each SOW from out vector
-    sow = getindex(sow_ens,j)
-    # run the adaptive policy wit pur initial elevation
-    policiesA = AdaptivePolicy(n_levels_init)
-    # run the simulation for the sow with this adaptive policy
-    profitsA = [simulate(sow, policiesA) for i in 1:length(year)]
-    profits_avgA = mean.(profitsA)
-    push!(NPV_levelA, profitsA)
-    push!(pol, profitsA)
-end
-
-return NPV_levelA
-
-#plot(
-        #n_levels,
-        #NPV_levelA;
-        #ylabel="NPV Profits [Million USD]",
-        #xlabel="Number of levels",
-        #legend=false,
-        #title="50 Year Horizon, 7% Discount, Uncertain Demand Growth",
-        #size=(800, 400),
-        #xticks=n_levels,
-    #)
-    #hline!([0])
-```
