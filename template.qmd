@@ -1,6 +1,6 @@
 ---
 title: "Lab 7: Parking Garage Case Study"
-author: "Your Name"
+author: "Lucia Romero-Alston (lmr12)"
 jupyter: julia-1.10
 date: 2024-03-08
 categories: [Lab]
